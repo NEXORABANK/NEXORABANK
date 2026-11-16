@@ -1,7 +1,7 @@
 // src/components/layout/AppShell.jsx
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, Home, Send, FileText, Upload, LogOut, ShieldAlert } from 'lucide-react';
+import { Menu, X, Home, Send, FileText, Upload, LogOut, ShieldAlert, Shield } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 export const AppShell = ({ children }) => {
@@ -22,7 +22,6 @@ export const AppShell = ({ children }) => {
     { path: '/documents', name: 'Document Center', icon: Upload },
   ];
 
-  // DYNAMIC ROLE CHECK: Reveal God Mode ONLY if their database role is 'admin'
   const isAdmin = profile?.role === 'admin';
 
   if (isAdmin) {
@@ -32,14 +31,15 @@ export const AppShell = ({ children }) => {
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#f8fafc', display: 'flex', flexDirection: 'column', margin: 0, padding: 0 }}>
       
-      <header style={{ backgroundColor: '#0a192f', padding: '15px 25px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'white', position: 'sticky', top: 0, zIndex: 50, boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
+      <header style={{ backgroundColor: '#020617', padding: '15px 25px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'white', position: 'sticky', top: 0, zIndex: 50, boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
           <button onClick={() => setIsMenuOpen(!isMenuOpen)} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
             {isMenuOpen ? <X size={30} /> : <Menu size={30} />}
           </button>
           
-          <Link to="/" style={{ textDecoration: 'none', color: '#ffd700', fontSize: '22px', letterSpacing: '1px', fontWeight: 'bold' }}>
-            NEXORA BANK
+          <Link to="/" style={{ textDecoration: 'none', color: '#f8fafc', fontSize: '20px', letterSpacing: '1.5px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Shield color="#10b981" size={24} />
+            NORTHFUNDS
           </Link>
         </div>
         
@@ -49,7 +49,7 @@ export const AppShell = ({ children }) => {
       </header>
 
       {isMenuOpen && (
-        <div style={{ position: 'absolute', top: '70px', left: 0, width: '100%', backgroundColor: '#0a192f', zIndex: 40, borderTop: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }}>
+        <div style={{ position: 'absolute', top: '70px', left: 0, width: '100%', backgroundColor: '#0f172a', zIndex: 40, borderTop: '1px solid rgba(255,255,255,0.05)', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }}>
           <div style={{ padding: '10px 0' }}>
             {navItems.map(item => {
               const Icon = item.icon;
@@ -57,7 +57,7 @@ export const AppShell = ({ children }) => {
               const isGodMode = item.path === '/admin';
               
               return (
-                <Link key={item.path} to={item.path} onClick={() => setIsMenuOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '15px 30px', textDecoration: 'none', color: isGodMode ? '#ef4444' : (isActive ? '#ffd700' : 'white'), backgroundColor: isActive ? 'rgba(255,255,255,0.05)' : 'transparent', borderLeft: isActive ? '4px solid #ffd700' : '4px solid transparent', fontWeight: isActive ? 'bold' : 'normal' }}>
+                <Link key={item.path} to={item.path} onClick={() => setIsMenuOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '15px 30px', textDecoration: 'none', color: isGodMode ? '#ef4444' : (isActive ? '#10b981' : '#cbd5e1'), backgroundColor: isActive ? 'rgba(16, 185, 129, 0.05)' : 'transparent', borderLeft: isActive ? '4px solid #10b981' : '4px solid transparent', fontWeight: isActive ? 'bold' : '500' }}>
                   <Icon size={20} /> {item.name}
                 </Link>
               )
