@@ -272,6 +272,48 @@ export const AdminDashboard = () => {
         </div>
       )}
 
+      {/* 3. Create User Modal */}
+      {isCreateOpen && (
+        <div className="no-print" style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(15,23,42,0.7)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 100, padding: '15px' }}>
+          <div style={{ backgroundColor: 'white', padding: '30px', borderRadius: '24px', width: '100%', maxWidth: '450px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+              <h3 style={{ margin: 0, color: '#1e293b', fontSize: '20px' }}>Open New Client Account</h3>
+              <button onClick={() => setIsCreateOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={24} color="#64748b" /></button>
+            </div>
+            <form onSubmit={handleCreateUser} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+              <div><label style={labelStyle}>Full Name</label><input type="text" required value={createForm.full_name} onChange={e => setCreateForm({...createForm, full_name: e.target.value})} style={inputStyle} /></div>
+              <div><label style={labelStyle}>Email Address</label><input type="email" required value={createForm.email} onChange={e => setCreateForm({...createForm, email: e.target.value})} style={inputStyle} /></div>
+              <div><label style={labelStyle}>Physical Address</label><input type="text" value={createForm.address} onChange={e => setCreateForm({...createForm, address: e.target.value})} style={inputStyle} /></div>
+              <div><label style={labelStyle}>Initial Ledger Deposit (£)</label><input type="number" step="0.01" value={createForm.initial_deposit} onChange={e => setCreateForm({...createForm, initial_deposit: e.target.value})} style={inputStyle} /></div>
+              
+              <button type="submit" disabled={actionLoading} style={{ width: '100%', padding: '15px', backgroundColor: '#059669', color: 'white', border: 'none', borderRadius: '12px', fontWeight: '700', marginTop: '10px', cursor: 'pointer' }}>
+                {actionLoading ? 'Creating...' : 'Provision New Client'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* 4. Edit User Modal */}
+      {editModalUser && (
+        <div className="no-print" style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(15,23,42,0.7)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 100, padding: '15px' }}>
+          <div style={{ backgroundColor: 'white', padding: '30px', borderRadius: '24px', width: '100%', maxWidth: '400px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+              <h3 style={{ margin: 0, color: '#1e293b', fontSize: '20px' }}>Modify Profile</h3>
+              <button onClick={() => setEditModalUser(null)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={24} color="#64748b" /></button>
+            </div>
+            <form onSubmit={handleEditUser} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+              <div><label style={labelStyle}>Full Name</label><input type="text" required value={editForm.full_name} onChange={e => setEditForm({...editForm, full_name: e.target.value})} style={inputStyle} /></div>
+              <div><label style={labelStyle}>Registered Address</label><input type="text" required value={editForm.address} onChange={e => setEditForm({...editForm, address: e.target.value})} style={inputStyle} /></div>
+              
+              <button type="submit" disabled={actionLoading} style={{ width: '100%', padding: '15px', backgroundColor: '#0ea5e9', color: 'white', border: 'none', borderRadius: '12px', fontWeight: '700', marginTop: '10px', cursor: 'pointer' }}>
+                {actionLoading ? 'Saving...' : 'Save Changes'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* --- PRINTABLE RECEIPT TEMPLATE (Hidden unless printing) --- */}
       {receiptModalUser && (
         <div id="printable-receipt" style={{ display: 'none' }}>
@@ -304,9 +346,6 @@ export const AdminDashboard = () => {
         </div>
       )}
 
-      {/* CREATE & EDIT MODALS (Hidden for brevity, structurally identical to previous version but tagged with .no-print) */}
-      {/* ... (Create User and Edit User modals operate exactly as before but are wrapped in <div className="no-print">) */}
-      
       {/* CSS MAGIC for Printing & Mobile */}
       <style>
         {`
