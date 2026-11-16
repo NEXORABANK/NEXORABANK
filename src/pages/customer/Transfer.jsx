@@ -1,4 +1,4 @@
-// src/pages/Transfer.jsx
+// src/pages/customer/Transfer.jsx
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
@@ -7,7 +7,7 @@ import { Send, Search, Lock, AlertCircle, CheckCircle } from 'lucide-react';
 export const Transfer = () => {
   const { profile } = useAuth();
   const [account, setAccount] = useState(null);
-  const [transferType, setTransferType] = useState('internal'); // 'internal' or 'external'
+  const [transferType, setTransferType] = useState('internal');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
   
@@ -26,7 +26,6 @@ export const Transfer = () => {
     fetchAccount();
   }, [profile]);
 
-  // Auto-Lookup Function
   const handleAccountInput = async (val) => {
     setAccNumber(val);
     setReceiverName('');
@@ -52,12 +51,13 @@ export const Transfer = () => {
     setLoading(true);
     const ref = 'TRF-' + Math.floor(Math.random() * 900000000);
     const numAmount = Number(amount);
+    const newBalance = Number(account.balance) - numAmount;
 
     try {
       // 1. Deduct sender
-      await supabase.from('accounts').update({ balance: Number(account.balance) - numAmount }).eq('id', account.id);
+      await supabase.from('accounts').update({ balance: newBalance }).eq('id', account.id);
       
-      // 2. Add to internal receiver (if internal)
+      // 2. Add to internal receiver
       if (transferType === 'internal') {
         const { data: recAcc } = await supabase.from('accounts').select('id, balance').eq('account_number', accNumber).single();
         if (recAcc) {
@@ -66,7 +66,7 @@ export const Transfer = () => {
       }
 
       // 3. Log transaction
-      await supabase.from('transactions').insert([{
+      const { error: txError } = await supabase.from('transactions').insert([{
         sender_account_id: account.id,
         receiver_account_number: accNumber,
         receiver_name: transferType === 'internal' ? receiverName : 'External Bank',
@@ -77,6 +77,25 @@ export const Transfer = () => {
         description: desc
       }]);
 
+      if (txError) throw txError;
+
+      // 4. Trigger Email Receipt to Sender
+      try {
+        await fetch('/api/send-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            toEmail: profile.email,
+            clientName: profile.full_name,
+            amount: numAmount,
+            newBalance: newBalance,
+            type: `Debit (Transfer to ${transferType === 'internal' ? receiverName : 'External Bank'})`
+          })
+        });
+      } catch (emailError) {
+        console.error("Email failed to send:", emailError);
+      }
+
       setMessage({ type: 'success', text: `Successfully transferred £${numAmount} to ${receiverName || accNumber}` });
       setAccNumber(''); setAmount(''); setDesc(''); setReceiverName('');
       
@@ -85,7 +104,8 @@ export const Transfer = () => {
       setAccount(freshAcc);
 
     } catch (err) {
-      setMessage({ type: 'error', text: 'Transfer failed. Please try again.' });
+      console.error(err);
+      setMessage({ type: 'error', text: 'Transfer failed. Check database permissions.' });
     }
     setLoading(false);
   };
@@ -103,10 +123,9 @@ export const Transfer = () => {
     <div className="fade-in" style={{ maxWidth: '600px', margin: '0 auto', paddingBottom: '40px' }}>
       <h2 style={{ color: '#1e293b', marginBottom: '20px', fontSize: '22px', fontWeight: '800' }}>Send Funds</h2>
       
-      {/* Transfer Tabs */}
       <div style={{ display: 'flex', backgroundColor: '#e2e8f0', borderRadius: '12px', padding: '4px', marginBottom: '25px' }}>
         <button onClick={() => setTransferType('internal')} style={{ flex: 1, padding: '12px', border: 'none', borderRadius: '8px', fontWeight: '700', fontSize: '14px', cursor: 'pointer', backgroundColor: transferType === 'internal' ? '#ffffff' : 'transparent', color: transferType === 'internal' ? '#059669' : '#475569', boxShadow: transferType === 'internal' ? '0 2px 4px rgba(0,0,0,0.05)' : 'none', transition: 'all 0.2s' }}>
-          Northfunds Transfer (Free)
+          Northfunds Transfer
         </button>
         <button onClick={() => setTransferType('external')} style={{ flex: 1, padding: '12px', border: 'none', borderRadius: '8px', fontWeight: '700', fontSize: '14px', cursor: 'pointer', backgroundColor: transferType === 'external' ? '#ffffff' : 'transparent', color: transferType === 'external' ? '#0ea5e9' : '#475569', boxShadow: transferType === 'external' ? '0 2px 4px rgba(0,0,0,0.05)' : 'none', transition: 'all 0.2s' }}>
           Other Banks
@@ -120,18 +139,14 @@ export const Transfer = () => {
         </div>
       )}
 
-      {/* External Transfer Lockout UI */}
       {transferType === 'external' && !account.allow_external_transfers ? (
         <div className="slide-up" style={{ backgroundColor: '#f8fafc', padding: '40px 20px', textAlign: 'center', borderRadius: '20px', border: '1px dashed #cbd5e1' }}>
-          <div style={{ backgroundColor: '#e0f2fe', width: '60px', height: '60px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px auto' }}>
-            <Lock size={28} color="#0ea5e9" />
-          </div>
+          <div style={{ backgroundColor: '#e0f2fe', width: '60px', height: '60px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px auto' }}><Lock size={28} color="#0ea5e9" /></div>
           <h3 style={{ margin: '0 0 10px 0', color: '#1e293b' }}>External Transfers Disabled</h3>
-          <p style={{ color: '#64748b', fontSize: '14px', lineHeight: '1.6' }}>For your security, cross-border and external banking transfers require administrative approval. Please contact your account manager for clearance.</p>
+          <p style={{ color: '#64748b', fontSize: '14px', lineHeight: '1.6' }}>Please contact your account manager for clearance.</p>
         </div>
       ) : (
         <form onSubmit={handleTransfer} className="slide-up" style={{ backgroundColor: '#ffffff', padding: '25px', borderRadius: '20px', boxShadow: '0 4px 15px rgba(0,0,0,0.03)', border: '1px solid #f1f5f9' }}>
-          
           <div style={{ marginBottom: '15px' }}>
             <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '13px', color: '#475569' }}>Receiver Account Number</label>
             <div style={{ position: 'relative' }}>
@@ -144,27 +159,21 @@ export const Transfer = () => {
               </div>
             )}
           </div>
-
           <div style={{ marginBottom: '15px' }}>
             <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '13px', color: '#475569' }}>Amount (£)</label>
             <input type="number" required min="1" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} style={{ width: '100%', padding: '14px', border: '1px solid #e2e8f0', borderRadius: '12px', boxSizing: 'border-box', outline: 'none', fontSize: '18px', fontWeight: 'bold' }} placeholder="0.00" />
-            <div style={{ textAlign: 'right', marginTop: '6px', fontSize: '12px', color: '#64748b' }}>
-              Available Balance: £{Number(account.balance).toLocaleString('en-GB', {minimumFractionDigits:2})}
-            </div>
+            <div style={{ textAlign: 'right', marginTop: '6px', fontSize: '12px', color: '#64748b' }}>Available Balance: £{Number(account.balance).toLocaleString('en-GB', {minimumFractionDigits:2})}</div>
           </div>
-
           <div style={{ marginBottom: '25px' }}>
             <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '13px', color: '#475569' }}>Description</label>
             <input type="text" value={desc} onChange={(e) => setDesc(e.target.value)} style={{ width: '100%', padding: '14px', border: '1px solid #e2e8f0', borderRadius: '12px', boxSizing: 'border-box', outline: 'none', fontSize: '15px' }} placeholder="e.g. Invoice Payment" />
           </div>
-
           <button type="submit" disabled={loading} style={{ width: '100%', padding: '16px', backgroundColor: '#059669', color: '#ffffff', border: 'none', borderRadius: '24px', cursor: loading ? 'not-allowed' : 'pointer', fontWeight: '700', fontSize: '16px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
             {loading ? 'Processing...' : <><Send size={18} /> Send Securely</>}
           </button>
         </form>
       )}
 
-      {/* Animations CSS */}
       <style>{`
         .fade-in { animation: fadeIn 0.3s ease-in; }
         .slide-up { animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
