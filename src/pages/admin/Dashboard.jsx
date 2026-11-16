@@ -73,9 +73,36 @@ export const AdminDashboard = () => {
   const handleModifyBalance = async (e) => {
     e.preventDefault();
     setActionLoading(true);
-    const newBalance = fundType === 'add' ? Number(fundModalUser.account.balance) + Number(fundAmount) : Number(fundModalUser.account.balance) - Number(fundAmount);
+    
+    const amountNum = Number(fundAmount);
+    const newBalance = fundType === 'add' 
+      ? Number(fundModalUser.account.balance) + amountNum 
+      : Number(fundModalUser.account.balance) - amountNum;
+
+    // 1. Update the database ledger
     await supabase.from('accounts').update({ balance: newBalance }).eq('id', fundModalUser.account.id);
-    setFundModalUser(null); setFundAmount(''); fetchUsers(); setActionLoading(false);
+    
+    // 2. Trigger the Vercel Email API
+    try {
+      await fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          toEmail: fundModalUser.email,
+          clientName: fundModalUser.full_name,
+          amount: amountNum,
+          newBalance: newBalance,
+          type: fundType === 'add' ? 'Credit' : 'Debit'
+        })
+      });
+    } catch (emailError) {
+      console.error("Email failed to send:", emailError);
+    }
+
+    setFundModalUser(null); 
+    setFundAmount(''); 
+    fetchUsers(); 
+    setActionLoading(false);
   };
 
   const handleToggleLock = async (user) => {
