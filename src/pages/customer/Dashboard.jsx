@@ -1,7 +1,7 @@
 // src/pages/Dashboard.jsx
 import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
-import { useAuth } from '../context/AuthContext';
+import { supabase } from '../../lib/supabase';
+import { useAuth } from '../../context/AuthContext';
 import { Wallet, ArrowUpRight, ArrowDownLeft, Clock, Shield, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 

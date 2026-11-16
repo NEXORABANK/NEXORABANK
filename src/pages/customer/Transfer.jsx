@@ -1,7 +1,7 @@
 // src/pages/Transfer.jsx
 import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
-import { useAuth } from '../context/AuthContext';
+import { supabase } from '../../lib/supabase';
+import { useAuth } from '../../context/AuthContext';
 import { Send, Search, Lock, AlertCircle, CheckCircle } from 'lucide-react';
 
 export const Transfer = () => {
