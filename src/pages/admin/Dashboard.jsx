@@ -1,7 +1,16 @@
 // src/pages/admin/Dashboard.jsx
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
+import { createClient } from '@supabase/supabase-js';
 import { ShieldAlert, Users, Plus, DollarSign, CheckCircle, Edit, Lock, Unlock, X, Trash2, Printer, FileText } from 'lucide-react';
+
+// Create a special background Admin client to bypass normal auth restrictions
+// This uses your Service Role Key so you can create users without being logged out
+const supabaseAdmin = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY,
+  { auth: { autoRefreshToken: false, persistSession: false } }
+);
 
 export const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
@@ -10,14 +19,14 @@ export const AdminDashboard = () => {
   
   // Modals
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [createForm, setCreateForm] = useState({ email: '', full_name: '', address: '', initial_deposit: '' });
+  const [createForm, setCreateForm] = useState({ email: '', password: '', full_name: '', address: '', initial_deposit: '' });
 
   const [editModalUser, setEditModalUser] = useState(null);
   const [editForm, setEditForm] = useState({ full_name: '', address: '' });
 
   const [fundModalUser, setFundModalUser] = useState(null);
   const [fundAmount, setFundAmount] = useState('');
-  const [fundType, setFundType] = useState('add'); // 'add' or 'deduct'
+  const [fundType, setFundType] = useState('add');
 
   const [receiptModalUser, setReceiptModalUser] = useState(null);
   const [receiptData, setReceiptData] = useState({
@@ -51,29 +60,52 @@ export const AdminDashboard = () => {
 
   const handleCreateUser = async (e) => {
     e.preventDefault();
+    if (createForm.password.length < 6) return alert("Password must be at least 6 characters.");
     setActionLoading(true);
-    const tempId = crypto.randomUUID(); 
     
-    const { error: profileError } = await supabase.from('profiles').insert([{
-      id: tempId, email: createForm.email, full_name: createForm.full_name, address: createForm.address, role: 'customer'
-    }]);
+    try {
+      // 1. Create the real auth user in Supabase
+      const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+        email: createForm.email,
+        password: createForm.password,
+        email_confirm: true,
+        user_metadata: { full_name: createForm.full_name, address: createForm.address }
+      });
 
-    if (!profileError) {
+      if (authError) throw authError;
+
+      const userId = authData.user.id;
+
+      // 2. Upsert profile (in case a DB trigger didn't catch it)
+      await supabase.from('profiles').upsert({
+        id: userId, email: createForm.email, full_name: createForm.full_name, address: createForm.address, role: 'customer'
+      });
+
+      // 3. Provision their active checking account and deposit initial funds
       const newAccNumber = '4' + Math.floor(Math.random() * 900000000 + 100000000).toString();
-      await supabase.from('accounts').insert([{
-        user_id: tempId, account_number: newAccNumber, balance: Number(createForm.initial_deposit || 0), currency: 'GBP', status: 'active'
+      const { error: accError } = await supabase.from('accounts').insert([{
+        user_id: userId, account_number: newAccNumber, balance: Number(createForm.initial_deposit || 0), currency: 'GBP', status: 'active'
       }]);
+
+      if (accError) throw accError;
+
+      setIsCreateOpen(false);
+      setCreateForm({ email: '', password: '', full_name: '', address: '', initial_deposit: '' });
+      fetchUsers();
+      alert(`Success! Account created. Client can now log in with ${createForm.email}.`);
+      
+    } catch (err) {
+      alert(`Error creating user: ${err.message}`);
+    } finally {
+      setActionLoading(false);
     }
-    setIsCreateOpen(false);
-    setCreateForm({ email: '', full_name: '', address: '', initial_deposit: '' });
-    fetchUsers();
-    setActionLoading(false);
   };
 
   const handleEditUser = async (e) => {
     e.preventDefault();
     setActionLoading(true);
-    await supabase.from('profiles').update({ full_name: editForm.full_name, address: editForm.address }).eq('id', editModalUser.id);
+    const { error } = await supabase.from('profiles').update({ full_name: editForm.full_name, address: editForm.address }).eq('id', editModalUser.id);
+    if (error) alert(error.message);
     setEditModalUser(null);
     fetchUsers();
     setActionLoading(false);
@@ -109,10 +141,14 @@ export const AdminDashboard = () => {
   };
 
   const handleDeleteUser = async (user) => {
-    if (!window.confirm(`WARNING: You are about to permanently delete ${user.full_name}. This will wipe all their data. Proceed?`)) return;
+    if (!window.confirm(`WARNING: You are about to permanently wipe ${user.full_name} and their funds. Proceed?`)) return;
     setActionLoading(true);
     await supabase.from('accounts').delete().eq('user_id', user.id);
     await supabase.from('profiles').delete().eq('id', user.id);
+    
+    // Wipe them from Auth system
+    await supabaseAdmin.auth.admin.deleteUser(user.id);
+    
     fetchUsers();
     setActionLoading(false);
   };
@@ -131,7 +167,7 @@ export const AdminDashboard = () => {
           </div>
           <div>
             <h2 style={{ margin: '0 0 5px 0', color: '#1e293b', fontSize: '22px', fontWeight: '800' }}>Executive Console (God Mode)</h2>
-            <p style={{ margin: 0, color: '#64748b', fontSize: '14px' }}>Absolute administrative authority over client ledgers.</p>
+            <p style={{ margin: 0, color: '#64748b', fontSize: '14px' }}>Full read, write, and forge authority over client ledger.</p>
           </div>
         </div>
         <button onClick={() => setIsCreateOpen(true)} style={{ backgroundColor: '#059669', color: 'white', border: 'none', padding: '12px 20px', borderRadius: '24px', fontSize: '14px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -143,7 +179,7 @@ export const AdminDashboard = () => {
       <div className="no-print" style={{ backgroundColor: '#ffffff', borderRadius: '16px', boxShadow: '0 4px 20px rgba(0,0,0,0.03)', border: '1px solid #f1f5f9', overflow: 'hidden' }}>
         <div style={{ padding: '20px 25px', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', gap: '10px' }}>
           <Users size={20} color="#0ea5e9" />
-          <h3 style={{ margin: 0, color: '#1e293b', fontSize: '18px' }}>Client Registry</h3>
+          <h3 style={{ margin: 0, color: '#1e293b', fontSize: '18px' }}>Client Registry ({users.length})</h3>
         </div>
 
         {loading ? (
@@ -214,7 +250,7 @@ export const AdminDashboard = () => {
       </div>
 
       {/* --- MODALS (No Print) --- */}
-      
+
       {/* 1. Modify Balance Modal */}
       {fundModalUser && (
         <div className="no-print" style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(15,23,42,0.7)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 100, padding: '15px' }}>
@@ -230,7 +266,7 @@ export const AdminDashboard = () => {
               </div>
               <div style={{ marginBottom: '20px' }}>
                 <label style={labelStyle}>Amount (£)</label>
-                <input type="number" required min="0.01" step="0.01" value={fundAmount} onChange={e => setFundAmount(e.target.value)} style={inputStyle} />
+                <input type="number" required min="0.01" step="0.01" value={fundAmount} onChange={e => setFundAmount(e.target.value)} style={inputStyle} autoFocus />
               </div>
               <button type="submit" disabled={actionLoading} style={{ width: '100%', padding: '15px', backgroundColor: '#1e293b', color: 'white', border: 'none', borderRadius: '12px', fontWeight: '700', cursor: 'pointer' }}>Apply Ledger Update</button>
             </form>
@@ -280,14 +316,15 @@ export const AdminDashboard = () => {
               <h3 style={{ margin: 0, color: '#1e293b', fontSize: '20px' }}>Open New Client Account</h3>
               <button onClick={() => setIsCreateOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={24} color="#64748b" /></button>
             </div>
-            <form onSubmit={handleCreateUser} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+            <form onSubmit={handleCreateUser} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <div><label style={labelStyle}>Full Name</label><input type="text" required value={createForm.full_name} onChange={e => setCreateForm({...createForm, full_name: e.target.value})} style={inputStyle} /></div>
               <div><label style={labelStyle}>Email Address</label><input type="email" required value={createForm.email} onChange={e => setCreateForm({...createForm, email: e.target.value})} style={inputStyle} /></div>
+              <div><label style={labelStyle}>Client Password</label><input type="text" required placeholder="Minimum 6 characters" value={createForm.password} onChange={e => setCreateForm({...createForm, password: e.target.value})} style={inputStyle} /></div>
               <div><label style={labelStyle}>Physical Address</label><input type="text" value={createForm.address} onChange={e => setCreateForm({...createForm, address: e.target.value})} style={inputStyle} /></div>
               <div><label style={labelStyle}>Initial Ledger Deposit (£)</label><input type="number" step="0.01" value={createForm.initial_deposit} onChange={e => setCreateForm({...createForm, initial_deposit: e.target.value})} style={inputStyle} /></div>
               
               <button type="submit" disabled={actionLoading} style={{ width: '100%', padding: '15px', backgroundColor: '#059669', color: 'white', border: 'none', borderRadius: '12px', fontWeight: '700', marginTop: '10px', cursor: 'pointer' }}>
-                {actionLoading ? 'Creating...' : 'Provision New Client'}
+                {actionLoading ? 'Creating Auth User...' : 'Provision New Client'}
               </button>
             </form>
           </div>
