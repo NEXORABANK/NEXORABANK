@@ -34,45 +34,47 @@ export const Login = () => {
   };
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#f1f5f9', fontFamily: '"Inter", Arial, sans-serif' }}>
-      <div style={{ backgroundColor: 'white', padding: '40px', borderRadius: '16px', boxShadow: '0 10px 25px rgba(0,0,0,0.05)', width: '100%', maxWidth: '400px' }}>
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#f8fafc', fontFamily: '"Inter", sans-serif', padding: '20px' }}>
+      <div style={{ backgroundColor: '#ffffff', padding: '40px 30px', borderRadius: '24px', boxShadow: '0 10px 40px rgba(0,0,0,0.04)', width: '100%', maxWidth: '400px', border: '1px solid #f1f5f9' }}>
         
-        <div style={{ textAlign: 'center', marginBottom: '30px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '35px' }}>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '15px' }}>
-            <Shield color="#10b981" size={48} />
+            <div style={{ backgroundColor: '#e0f2fe', padding: '15px', borderRadius: '50%' }}>
+              <Shield color="#0ea5e9" size={32} />
+            </div>
           </div>
-          <h1 style={{ color: '#020617', margin: '0 0 8px 0', fontSize: '24px', letterSpacing: '1px', fontWeight: '800' }}>NORTHFUNDS</h1>
-          <p style={{ color: '#64748b', margin: 0, fontSize: '14px', fontWeight: '500' }}>Secure Private Access</p>
+          <h1 style={{ color: '#1e293b', margin: '0 0 5px 0', fontSize: '22px', letterSpacing: '0.5px', fontWeight: '800' }}>Welcome Back</h1>
+          <p style={{ color: '#64748b', margin: 0, fontSize: '14px', fontWeight: '500' }}>Enter your details to access your vault.</p>
         </div>
 
         {error && (
-          <div style={{ backgroundColor: '#fef2f2', color: '#991b1b', padding: '12px', borderRadius: '8px', marginBottom: '20px', fontSize: '14px', border: '1px solid #fecaca' }}>
+          <div style={{ backgroundColor: '#fef2f2', color: '#991b1b', padding: '12px', borderRadius: '12px', marginBottom: '20px', fontSize: '14px', border: '1px solid #fecaca' }}>
             {error}
           </div>
         )}
 
-        <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+        <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div>
-            <label style={{ display: 'block', marginBottom: '5px', fontWeight: '600', fontSize: '13px', color: '#334155' }}>Encrypted Email</label>
-            <input type="email" required value={email} onChange={e => setEmail(e.target.value)} style={{ width: '100%', padding: '12px', border: '1px solid #cbd5e1', borderRadius: '8px', boxSizing: 'border-box', outline: 'none', backgroundColor: '#f8fafc' }} />
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '13px', color: '#475569' }}>Email Address</label>
+            <input type="email" required value={email} onChange={e => setEmail(e.target.value)} style={{ width: '100%', padding: '14px', border: '1px solid #e2e8f0', borderRadius: '12px', boxSizing: 'border-box', outline: 'none', backgroundColor: '#ffffff', fontSize: '15px', color: '#1e293b', transition: 'border 0.2s' }} onFocus={e => e.target.style.borderColor = '#0ea5e9'} onBlur={e => e.target.style.borderColor = '#e2e8f0'} />
           </div>
           
           <div>
-            <label style={{ display: 'block', marginBottom: '5px', fontWeight: '600', fontSize: '13px', color: '#334155' }}>Security Passphrase / PIN</label>
-            <input type="password" required value={password} onChange={e => setPassword(e.target.value)} style={{ width: '100%', padding: '12px', border: '1px solid #cbd5e1', borderRadius: '8px', boxSizing: 'border-box', outline: 'none', backgroundColor: '#f8fafc' }} />
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '13px', color: '#475569' }}>Security PIN / Password</label>
+            <input type="password" required value={password} onChange={e => setPassword(e.target.value)} style={{ width: '100%', padding: '14px', border: '1px solid #e2e8f0', borderRadius: '12px', boxSizing: 'border-box', outline: 'none', backgroundColor: '#ffffff', fontSize: '15px', color: '#1e293b', transition: 'border 0.2s' }} onFocus={e => e.target.style.borderColor = '#0ea5e9'} onBlur={e => e.target.style.borderColor = '#e2e8f0'} />
           </div>
 
-          <button type="submit" disabled={loading} style={{ width: '100%', padding: '14px', backgroundColor: '#10b981', color: '#020617', border: 'none', borderRadius: '8px', cursor: loading ? 'not-allowed' : 'pointer', fontWeight: 'bold', marginTop: '10px', fontSize: '16px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', transition: 'background 0.2s' }}>
+          <button type="submit" disabled={loading} style={{ width: '100%', padding: '15px', backgroundColor: '#059669', color: '#ffffff', border: 'none', borderRadius: '24px', cursor: loading ? 'not-allowed' : 'pointer', fontWeight: '700', marginTop: '10px', fontSize: '15px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', boxShadow: '0 4px 12px rgba(5, 150, 105, 0.2)' }}>
             {loading ? (
                <>
-                 <span style={{ display: 'inline-block', width: '16px', height: '16px', border: '2px solid rgba(2,6,23,0.3)', borderTopColor: '#020617', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
-                 Decrypting...
+                 <span style={{ display: 'inline-block', width: '16px', height: '16px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#ffffff', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+                 Authenticating...
                </>
-            ) : 'Access Vault'}
+            ) : 'Sign In'}
           </button>
 
-          <p style={{ textAlign: 'center', margin: '20px 0 0 0', fontSize: '14px', color: '#64748b' }}>
-            Require an account? <Link to="/register" style={{ color: '#10b981', fontWeight: '700', textDecoration: 'none' }}>Apply Here</Link>
+          <p style={{ textAlign: 'center', margin: '15px 0 0 0', fontSize: '14px', color: '#64748b' }}>
+            Don't have an account? <Link to="/register" style={{ color: '#0ea5e9', fontWeight: '700', textDecoration: 'none' }}>Apply Here</Link>
           </p>
         </form>
         

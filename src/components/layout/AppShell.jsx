@@ -29,27 +29,27 @@ export const AppShell = ({ children }) => {
   }
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f8fafc', display: 'flex', flexDirection: 'column', margin: 0, padding: 0 }}>
+    <div style={{ minHeight: '100vh', backgroundColor: '#f8fafc', display: 'flex', flexDirection: 'column', margin: 0, padding: 0, fontFamily: '"Inter", sans-serif' }}>
       
-      <header style={{ backgroundColor: '#020617', padding: '15px 25px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'white', position: 'sticky', top: 0, zIndex: 50, boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-          <button onClick={() => setIsMenuOpen(!isMenuOpen)} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
-            {isMenuOpen ? <X size={30} /> : <Menu size={30} />}
+      <header style={{ backgroundColor: '#ffffff', padding: '15px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, zIndex: 50, borderBottom: '1px solid #e2e8f0' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+          <button onClick={() => setIsMenuOpen(!isMenuOpen)} style={{ background: 'none', border: 'none', color: '#1e293b', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '5px' }}>
+            {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
           </button>
           
-          <Link to="/" style={{ textDecoration: 'none', color: '#f8fafc', fontSize: '20px', letterSpacing: '1.5px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Shield color="#10b981" size={24} />
+          <Link to="/" style={{ textDecoration: 'none', color: '#1e293b', fontSize: '18px', letterSpacing: '1px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Shield color="#0ea5e9" size={22} />
             NORTHFUNDS
           </Link>
         </div>
         
-        <button onClick={handleLogout} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', padding: '8px 15px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 'bold', transition: 'background 0.2s' }}>
+        <button onClick={handleLogout} style={{ background: '#f1f5f9', border: 'none', color: '#475569', padding: '8px 16px', borderRadius: '20px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '600', fontSize: '14px' }}>
           <LogOut size={16} /> <span className="hide-mobile">Sign Out</span>
         </button>
       </header>
 
       {isMenuOpen && (
-        <div style={{ position: 'absolute', top: '70px', left: 0, width: '100%', backgroundColor: '#0f172a', zIndex: 40, borderTop: '1px solid rgba(255,255,255,0.05)', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }}>
+        <div style={{ position: 'absolute', top: '65px', left: 0, width: '100%', backgroundColor: '#ffffff', zIndex: 40, borderBottom: '1px solid #e2e8f0', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.05)' }}>
           <div style={{ padding: '10px 0' }}>
             {navItems.map(item => {
               const Icon = item.icon;
@@ -57,7 +57,7 @@ export const AppShell = ({ children }) => {
               const isGodMode = item.path === '/admin';
               
               return (
-                <Link key={item.path} to={item.path} onClick={() => setIsMenuOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '15px 30px', textDecoration: 'none', color: isGodMode ? '#ef4444' : (isActive ? '#10b981' : '#cbd5e1'), backgroundColor: isActive ? 'rgba(16, 185, 129, 0.05)' : 'transparent', borderLeft: isActive ? '4px solid #10b981' : '4px solid transparent', fontWeight: isActive ? 'bold' : '500' }}>
+                <Link key={item.path} to={item.path} onClick={() => setIsMenuOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '16px 25px', textDecoration: 'none', color: isGodMode ? '#ef4444' : (isActive ? '#059669' : '#475569'), backgroundColor: isActive ? '#ecfdf5' : 'transparent', borderLeft: isActive ? '4px solid #059669' : '4px solid transparent', fontWeight: isActive ? '700' : '500', fontSize: '15px' }}>
                   <Icon size={20} /> {item.name}
                 </Link>
               )
@@ -66,7 +66,7 @@ export const AppShell = ({ children }) => {
         </div>
       )}
 
-      <main style={{ flex: 1, padding: '40px 20px', maxWidth: '900px', margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
+      <main style={{ flex: 1, padding: '25px 15px', maxWidth: '800px', margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
         {children}
       </main>
     </div>

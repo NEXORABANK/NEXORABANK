@@ -1,57 +1,60 @@
 // src/pages/Home.jsx
 import { Link } from 'react-router-dom';
-import { Shield, Lock, EyeOff, ChevronRight } from 'lucide-react';
+import { Shield, Lock, EyeOff, ChevronRight, Smartphone } from 'lucide-react';
 
 export const Home = () => {
   return (
-    <div style={{ fontFamily: '"Inter", sans-serif', backgroundColor: '#020617', minHeight: '100vh', color: '#f8fafc' }}>
+    <div style={{ fontFamily: '"Inter", sans-serif', backgroundColor: '#f8fafc', minHeight: '100vh', color: '#1e293b' }}>
       
       {/* Navigation */}
-      <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '25px 50px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-        <div style={{ fontSize: '22px', fontWeight: '800', letterSpacing: '1.5px', color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <Shield color="#10b981" size={28} />
-          NORTHFUNDS <span style={{ color: '#10b981', fontWeight: '400' }}>INC.</span>
+      <nav style={{ backgroundColor: '#ffffff', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 5%', borderBottom: '1px solid #e2e8f0', position: 'sticky', top: 0, zIndex: 50 }}>
+        <div style={{ fontSize: '20px', fontWeight: '800', letterSpacing: '1px', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Shield color="#0ea5e9" size={26} /> {/* Sky Blue */}
+          NORTHFUNDS
         </div>
-        <div style={{ display: 'flex', gap: '20px' }}>
-          <Link to="/login" style={{ color: '#cbd5e1', textDecoration: 'none', padding: '10px 20px', fontWeight: '500', transition: 'color 0.2s' }}>Sign In</Link>
-          <Link to="/register" style={{ backgroundColor: '#10b981', color: '#020617', textDecoration: 'none', padding: '10px 24px', borderRadius: '8px', fontWeight: '700', transition: 'opacity 0.2s' }}>Open Account</Link>
+        <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+          <Link to="/login" style={{ color: '#0ea5e9', textDecoration: 'none', padding: '10px 15px', fontWeight: '600', fontSize: '15px' }}>Sign In</Link>
+          <Link to="/register" style={{ backgroundColor: '#059669', color: '#ffffff', textDecoration: 'none', padding: '10px 20px', borderRadius: '24px', fontWeight: '600', fontSize: '15px', boxShadow: '0 4px 6px rgba(5, 150, 105, 0.2)' }}>Open Account</Link> {/* Mature Green */}
         </div>
       </nav>
 
       {/* Hero Section */}
-      <header style={{ padding: '100px 20px', textAlign: 'center', maxWidth: '900px', margin: '0 auto' }}>
-        <div style={{ display: 'inline-block', padding: '8px 16px', backgroundColor: 'rgba(16, 185, 129, 0.1)', color: '#10b981', borderRadius: '20px', fontSize: '13px', fontWeight: '700', marginBottom: '25px', letterSpacing: '1px', textTransform: 'uppercase' }}>
-          Private Digital Wealth Management
+      <header style={{ padding: '80px 20px 60px 20px', textAlign: 'center', maxWidth: '800px', margin: '0 auto' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 16px', backgroundColor: '#e0f2fe', color: '#0369a1', borderRadius: '20px', fontSize: '13px', fontWeight: '700', marginBottom: '25px', letterSpacing: '0.5px' }}>
+          <Smartphone size={16} /> UK Standard Mobile Banking
         </div>
         
-        <h1 style={{ fontSize: '64px', margin: '0 0 24px 0', lineHeight: '1.1', fontWeight: '800', letterSpacing: '-1px' }}>
-          Secure your wealth in absolute <span style={{ color: '#10b981' }}>privacy.</span>
+        <h1 style={{ fontSize: '48px', margin: '0 0 20px 0', lineHeight: '1.2', fontWeight: '800', color: '#0f172a' }}>
+          Manage your wealth with <span style={{ color: '#059669' }}>absolute clarity.</span>
         </h1>
         
-        <p style={{ fontSize: '20px', color: '#94a3b8', lineHeight: '1.6', marginBottom: '40px', maxWidth: '700px', margin: '0 auto 40px auto' }}>
-          Northfunds Inc. provides exclusive, encrypted digital savings infrastructure. We protect your assets and your identity with military-grade security and borderless accessibility.
+        <p style={{ fontSize: '18px', color: '#475569', lineHeight: '1.6', marginBottom: '40px', maxWidth: '600px', margin: '0 auto 40px auto' }}>
+          Northfunds provides a secure, intuitive digital savings infrastructure. Protect your assets with military-grade encryption and seamless global accessibility.
         </p>
 
-        <Link to="/register" style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', backgroundColor: '#10b981', color: '#020617', textDecoration: 'none', padding: '16px 32px', borderRadius: '12px', fontSize: '18px', fontWeight: '700', transition: 'transform 0.2s', boxShadow: '0 10px 25px rgba(16, 185, 129, 0.2)' }}>
-          Establish Your Account <ChevronRight size={20} />
+        <Link to="/register" style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', backgroundColor: '#059669', color: '#ffffff', textDecoration: 'none', padding: '16px 32px', borderRadius: '24px', fontSize: '16px', fontWeight: '700', boxShadow: '0 8px 16px rgba(5, 150, 105, 0.25)', transition: 'transform 0.2s' }}>
+          Get Started Now <ChevronRight size={20} />
         </Link>
       </header>
 
       {/* Feature Highlights */}
-      <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '30px', padding: '40px 50px 100px 50px', maxWidth: '1200px', margin: '0 auto' }}>
-        <div style={{ backgroundColor: '#0f172a', padding: '40px', borderRadius: '16px', border: '1px solid #1e293b' }}>
-          <Lock color="#10b981" size={40} style={{ marginBottom: '20px' }} />
-          <h3 style={{ fontSize: '20px', marginBottom: '15px' }}>Impenetrable Security</h3>
-          <p style={{ color: '#94a3b8', lineHeight: '1.6', margin: 0 }}>Advanced cryptographic protocols safeguard your deposits, ensuring your funds remain insulated from external vulnerabilities.</p>
+      <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '25px', padding: '20px 5% 80px 5%', maxWidth: '1000px', margin: '0 auto' }}>
+        <div style={{ backgroundColor: '#ffffff', padding: '35px', borderRadius: '20px', boxShadow: '0 4px 20px rgba(0,0,0,0.04)', border: '1px solid #f1f5f9' }}>
+          <div style={{ backgroundColor: '#e0f2fe', width: '50px', height: '50px', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px' }}>
+            <Lock color="#0ea5e9" size={24} />
+          </div>
+          <h3 style={{ fontSize: '18px', marginBottom: '10px', color: '#1e293b', fontWeight: '700' }}>Bank-Grade Security</h3>
+          <p style={{ color: '#475569', lineHeight: '1.6', margin: 0, fontSize: '15px' }}>Advanced cryptographic protocols safeguard your deposits, insulating your funds from external vulnerabilities.</p>
         </div>
         
-        <div style={{ backgroundColor: '#0f172a', padding: '40px', borderRadius: '16px', border: '1px solid #1e293b' }}>
-          <EyeOff color="#10b981" size={40} style={{ marginBottom: '20px' }} />
-          <h3 style={{ fontSize: '20px', marginBottom: '15px' }}>Absolute Discretion</h3>
-          <p style={{ color: '#94a3b8', lineHeight: '1.6', margin: 0 }}>Your financial footprint is yours alone. We operate on a strict privacy-first mandate to shield your identity and transaction history.</p>
+        <div style={{ backgroundColor: '#ffffff', padding: '35px', borderRadius: '20px', boxShadow: '0 4px 20px rgba(0,0,0,0.04)', border: '1px solid #f1f5f9' }}>
+          <div style={{ backgroundColor: '#d1fae5', width: '50px', height: '50px', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px' }}>
+            <EyeOff color="#059669" size={24} />
+          </div>
+          <h3 style={{ fontSize: '18px', marginBottom: '10px', color: '#1e293b', fontWeight: '700' }}>Absolute Discretion</h3>
+          <p style={{ color: '#475569', lineHeight: '1.6', margin: 0, fontSize: '15px' }}>We operate on a strict privacy-first mandate. Your financial footprint and transaction history remain entirely confidential.</p>
         </div>
       </section>
-
     </div>
   );
 };
