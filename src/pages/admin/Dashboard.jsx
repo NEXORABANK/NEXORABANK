@@ -79,12 +79,31 @@ export const AdminDashboard = () => {
       ? Number(fundModalUser.account.balance) + amountNum 
       : Number(fundModalUser.account.balance) - amountNum;
 
-    // 1. Update the database ledger
-    await supabase.from('accounts').update({ balance: newBalance }).eq('id', fundModalUser.account.id);
+    // 1. Update balance
+    const { error: accError } = await supabase.from('accounts').update({ balance: newBalance }).eq('id', fundModalUser.account.id);
+    if (accError) {
+      alert("Database Error updating balance: " + accError.message);
+      setActionLoading(false);
+      return;
+    }
     
-    // 2. Trigger the Vercel Email API
+    // 2. Insert transaction into Ledger
+    const { error: txError } = await supabase.from('transactions').insert([{
+      receiver_account_number: fundType === 'add' ? fundModalUser.account.account_number : 'SYSTEM',
+      receiver_name: fundType === 'add' ? fundModalUser.full_name : 'System Deduction',
+      bank_name: 'Northfunds System',
+      amount: amountNum,
+      type: 'internal',
+      reference: (fundType === 'add' ? 'DEP-' : 'DED-') + Math.floor(Math.random() * 90000000),
+      description: fundType === 'add' ? 'System Deposit' : 'System Deduction',
+      sender_account_id: fundType === 'add' ? null : fundModalUser.account.id
+    }]);
+
+    if (txError) alert("Ledger Error (Check Supabase RLS!): " + txError.message);
+
+    // 3. Trigger Email & Alert Result
     try {
-      await fetch('/api/send-email', {
+      const res = await fetch('/api/send-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -92,17 +111,22 @@ export const AdminDashboard = () => {
           clientName: fundModalUser.full_name,
           amount: amountNum,
           newBalance: newBalance,
-          type: fundType === 'add' ? 'Credit' : 'Debit'
+          type: fundType === 'add' ? 'Credit Deposit' : 'Debit Deduction'
         })
       });
+      
+      const data = await res.json();
+      
+      if (data.error) {
+        alert("Balance Updated, but Email Failed: " + data.error);
+      } else {
+        alert("SUCCESS! Balance updated and Email Sent.");
+      }
     } catch (emailError) {
-      console.error("Email failed to send:", emailError);
+      alert("Email API crashed: " + emailError.message);
     }
 
-    setFundModalUser(null); 
-    setFundAmount(''); 
-    fetchUsers(); 
-    setActionLoading(false);
+    setFundModalUser(null); setFundAmount(''); fetchUsers(); setActionLoading(false);
   };
 
   const handleToggleLock = async (user) => {
